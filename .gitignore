@@ -152,3 +152,10 @@ Thumbs.db
 # Environment variables
 .env
 .env.*
+node_modules/
+dist/
+build/
+*.log
+.env
+.DS_Store
+
