@@ -1,9 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { fetchCFStats } from './api/codeforces';
 import { fetchGitHubStats } from './api/github';
+import { fetchXPData } from './api/xp';
+
 function App() {
   const [cfData, setCfData] = useState(null);
 const [ghData, setGhData] = useState(null);
+const [xpData, setXpData] = useState(null);
+
+useEffect(() => {
+  const loadXP = async () => {
+    const data = await fetchXPData();
+    setXpData(data);
+  };
+
+  loadXP(); // Initial fetch
+
+  const interval = setInterval(() => {
+    loadXP(); // Auto-refresh every 5 minutes (300,000 ms)
+  }, 300000);
+
+  return () => clearInterval(interval); // Cleanup on unmount
+}, []);
+
   useEffect(() => {
     fetchCFStats('_Sorcerer_').then(data => setCfData(data));
   }, []);
@@ -36,6 +55,19 @@ useEffect(() => {
     <p>Followers: {ghData.followers}</p>
   </div>
 )}
+{xpData && (
+  <div className="bg-gray-800 p-4 rounded-xl mt-6 shadow-lg text-center w-2/3">
+    <p className="text-xl text-purple-400 font-semibold">XP Tracker</p>
+    <p className="mt-2">Today’s XP: {xpData.xp} / {xpData.goal}</p>
+    <div className="w-full bg-gray-700 rounded-full h-4 mt-2">
+      <div
+        className="bg-purple-500 h-4 rounded-full"
+        style={{ width: `${(xpData.xp / xpData.goal) * 100}%` }}
+      />
+    </div>
+  </div>
+)}
+
 
     </div>
   );
