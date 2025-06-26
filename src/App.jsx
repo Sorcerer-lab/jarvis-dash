@@ -2,11 +2,27 @@ import React, { useEffect, useState } from 'react';
 import { fetchCFStats } from './api/codeforces';
 import { fetchGitHubStats } from './api/github';
 import { fetchXPData } from './api/xp';
+import quotes from './data/quotes';
 
 function App() {
   const [cfData, setCfData] = useState(null);
 const [ghData, setGhData] = useState(null);
 const [xpData, setXpData] = useState(null);
+const [quote, setQuote] = useState('');
+
+useEffect(() => {
+  const random = quotes[Math.floor(Math.random() * quotes.length)];
+  setQuote(random);
+
+  // Optional auto-refresh every 60s
+  const interval = setInterval(() => {
+    const random = quotes[Math.floor(Math.random() * quotes.length)];
+    setQuote(random);
+  }, 60000);
+
+  return () => clearInterval(interval);
+}, []);
+
 
 useEffect(() => {
   const loadXP = async () => {
@@ -67,6 +83,13 @@ useEffect(() => {
     </div>
   </div>
 )}
+{quote && (
+  <div className="bg-gray-800 p-4 rounded-xl mt-6 shadow-lg text-center w-3/4">
+    <p className="text-xl text-cyan-400 font-semibold">Quote of the Moment</p>
+    <p className="mt-4 italic text-gray-300">"{quote}"</p>
+  </div>
+)}
+
 
 
     </div>
