@@ -3,13 +3,18 @@ import { fetchCFStats } from './api/codeforces';
 import { fetchGitHubStats } from './api/github';
 import { fetchXPData } from './api/xp';
 import quotes from './data/quotes';
+import { fetchLocalGPTStatus } from './api/gpt_status';
 
 function App() {
   const [cfData, setCfData] = useState(null);
 const [ghData, setGhData] = useState(null);
 const [xpData, setXpData] = useState(null);
 const [quote, setQuote] = useState('');
+const [gptStatus, setGptStatus] = useState({ online: false, model: '' });
 
+useEffect(() => {
+  fetchLocalGPTStatus().then(setGptStatus);
+}, []);
 useEffect(() => {
   const random = quotes[Math.floor(Math.random() * quotes.length)];
   setQuote(random);
@@ -89,10 +94,18 @@ useEffect(() => {
     <p className="mt-4 italic text-gray-300">"{quote}"</p>
   </div>
 )}
+<div className="card bg-gray-900 text-white p-4 rounded-xl shadow-md">
+  <h2 className="text-lg font-semibold">🧠 Local GPT Status</h2>
+  <p>Status: <span className={gptStatus.online ? "text-green-400" : "text-red-500"}>
+    {gptStatus.online ? "Online" : "Offline"}
+  </span></p>
+  <p>Model: <span className="text-blue-300">{gptStatus.model}</span></p>
+</div>
 
 
 
     </div>
+    
   );
 }
 
