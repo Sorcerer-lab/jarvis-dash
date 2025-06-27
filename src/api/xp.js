@@ -1,7 +1,12 @@
 import axios from 'axios';
+import dotenv from 'dotenv';
+dotenv.config();
+
+// Access your API key
+const API_KEY = process.env.GOOGLE_API_KEY;
 
 const SHEET_ID = '1z2DeCZQAg1ERdxKhgP3uXj2mU1OiG6qDdDUWTACGcxs';
-const API_KEY = 'AIzaSyDgwKakAysYIbENvFpdddFrf9ejQ0SvxMo';
+
 const RANGE = 'Sheet1!A2:B2'; // Assuming your XP & goal are in row 2
 
 export const fetchXPData = async () => {

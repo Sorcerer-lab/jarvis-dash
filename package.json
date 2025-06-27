@@ -2,6 +2,7 @@
   "name": "jarvis-dash",
   "version": "1.0.0",
   "main": "main.js",
+  "type": "module",
   "scripts": {
     "start": "react-scripts start",
     "electron": "concurrently \"npm start\" \"wait-on http://localhost:3000 && electron .\"",
@@ -10,6 +11,7 @@
   "dependencies": {
     "axios": "^1.4.0",
     "concurrently": "^8.0.1",
+    "dotenv": "^16.6.0",
     "electron": "^27.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
