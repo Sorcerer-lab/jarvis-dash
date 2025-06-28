@@ -1,18 +1,20 @@
 export async function fetchLocalGPTStatus() {
   try {
-    const res = await fetch("http://localhost:1234/v1/models");
-    if (!res.ok) throw new Error("GPT not responding");
+    const res = await fetch("/v1/models");
     const data = await res.json();
 
-    const gptModel = data.data.find(model => 
+    console.log("📦 GPT Models fetched:", data);
+
+    const model = data.data.find(model =>
       model.id.includes("mistral") || model.id.includes("chatml")
     );
 
     return {
-      online: true,
-      model: gptModel?.id || "Unknown"
+      online: !!model,
+      model: model?.id || "Unavailable"
     };
-  } catch (err) {
+  } catch (error) {
+    console.error("❌ Error fetching GPT status:", error.message);
     return {
       online: false,
       model: "Unavailable"

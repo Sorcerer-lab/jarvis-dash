@@ -13,8 +13,27 @@ const [quote, setQuote] = useState('');
 const [gptStatus, setGptStatus] = useState({ online: false, model: '' });
 
 useEffect(() => {
-  fetchLocalGPTStatus().then(setGptStatus);
+  let isMounted = true;
+
+  const fetchAndUpdate = () => {
+    fetchLocalGPTStatus().then(status => {
+      if (isMounted) setGptStatus(status);
+    });
+  };
+
+  fetchAndUpdate(); // Initial fetch
+  const interval = setInterval(fetchAndUpdate, 30000); // Every 30s
+
+  return () => {
+    isMounted = false;
+    clearInterval(interval);
+  };
 }, []);
+useEffect(() => {
+  console.log("🧠 GPT Status Updated:", gptStatus);
+}, [gptStatus]);
+
+
 useEffect(() => {
   const random = quotes[Math.floor(Math.random() * quotes.length)];
   setQuote(random);
@@ -94,13 +113,19 @@ useEffect(() => {
     <p className="mt-4 italic text-gray-300">"{quote}"</p>
   </div>
 )}
-<div className="card bg-gray-900 text-white p-4 rounded-xl shadow-md">
-  <h2 className="text-lg font-semibold">🧠 Local GPT Status</h2>
-  <p>Status: <span className={gptStatus.online ? "text-green-400" : "text-red-500"}>
-    {gptStatus.online ? "Online" : "Offline"}
-  </span></p>
-  <p>Model: <span className="text-blue-300">{gptStatus.model}</span></p>
-</div>
+{gptStatus && (
+  <div className="card bg-gray-900 text-white p-4 rounded-xl shadow-md">
+    <h2 className="text-lg font-semibold">🧠 Local GPT Status</h2>
+    <p>
+      Status:{" "}
+      <span className={gptStatus.online ? "text-green-400" : "text-red-500"}>
+        {gptStatus.online ? "Online" : "Offline"}
+      </span>
+    </p>
+    <p>Model: <span className="text-blue-300">{gptStatus.model}</span></p>
+  </div>
+)}
+
 
 
 

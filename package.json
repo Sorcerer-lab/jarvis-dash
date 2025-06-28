@@ -2,7 +2,9 @@
   "name": "jarvis-dash",
   "version": "1.0.0",
   "main": "main.js",
-  "type": "module",
+  "proxy": "http://localhost:1234",
+
+  
   "scripts": {
     "start": "react-scripts start",
     "electron": "concurrently \"npm start\" \"wait-on http://localhost:3000 && electron .\"",
