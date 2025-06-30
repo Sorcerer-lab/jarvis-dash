@@ -1,5 +1,9 @@
 import React from 'react';
 import { Card, CardContent, Typography } from '@mui/material';
+const headers = {
+  Accept: 'application/vnd.github+json',
+  Authorization: `Bearer ${process.env.REACT_APP_GITHUB_TOKEN}` // use env variable
+};
 
 const GitHubStats = ({ data }) => {
   if (!data) return null;

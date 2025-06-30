@@ -11,8 +11,8 @@ import GitHubStats from './components/GitHubStats';
 import XPTracker from './components/XPTracker';
 import Quote from './components/Quote';
 import GPTStatus from './components/GPTStatus';
-import { fetchCodeforcesXP } from './api/codeforces_xp';
-import { fetchGitHubXP } from './api/github_xp';
+import {fetchCodeforcesXP} from './api/codeforces_xp';
+import  {fetchGitHubXP}  from './api/github_xp';
 
 export default function App() {
   const [ghXpData, setGhXpData] = useState(null);
@@ -37,7 +37,7 @@ export default function App() {
 
    useEffect(() => {
   const loadXP = async () => {
-    const data = await fetchCodeforcesXP();
+    const data = await fetchCodeforcesXP('_Sorcerer_');
     setCfXpData(data);
   };
 
@@ -100,24 +100,19 @@ export default function App() {
     <CFStats data={cfData} />
     <GitHubStats data={ghData} />
     </Box>
-  <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around', gap: 4, mt: 6 }}>
+  <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around', mb: 4 }}>
   {cfXpData && (
-    <Card sx={{ backgroundColor: '#121212', color: 'white', minWidth: 300, maxWidth: 400, boxShadow: 6 }}>
-      <CardContent>
-        <Typography variant="h6" color="cyan" gutterBottom>
-          🧮 Codeforces XP Tracker
-        </Typography>
+    <div className="bg-gray-800 p-4 rounded-xl shadow-lg text-center w-[350px]">
+      <p className="text-xl text-green-400 font-semibold">🧮 Codeforces XP Tracker</p>
+            
         <Divider sx={{ backgroundColor: '#333', mb: 2 }} />
-        <Typography>📈 Rank : {xpData.rankXP??0} XP</Typography>
-        <Typography>📝 Submissions : {xpData.submissionXP??0} XP</Typography>
-        <Typography>⚔️ Contest Submissions : {xpData.contestSubmissionXP??0} XP</Typography>
-        <Typography>🎯 Contest Participation : {xpData.contestParticipationXP??0} XP</Typography>
+        <Typography>📝 Submissions : {cfXpData.submissionXP??0} XP</Typography>
+        <Typography>⚔️ Contest Submissions : {cfXpData.contestSubXP??0} XP</Typography>
+        <Typography>🎯 Contest Participation : {cfXpData.contestParticipationXP??0} XP</Typography>
         <Divider sx={{ backgroundColor: '#333', my: 2 }} />
-        <Typography variant="body1" color="lightgreen">
-          ⭐ Total XP : {xpData.totalXP??0}
-        </Typography>
-        <Divider sx={{ backgroundColor: '#333', my: 2 }} />
-        {cfXpData.upcomingContest ? (
+    
+          ⭐ Total XP : {cfXpData.totalXP??0}
+           {cfXpData.upcomingContest ? (
     <Box mt={2}>
       <Typography variant="subtitle1" color="secondary">
         🕒 Upcoming Contest:
@@ -128,9 +123,10 @@ export default function App() {
   ) : (
     <Typography mt={2}>No upcoming contests.</Typography>
   )}
-      </CardContent>
-    </Card>
-  )}
+    
+    </div>)}
+       
+
 
   {ghXpData && (
     <div className="bg-gray-800 p-4 rounded-xl shadow-lg text-center w-[350px]">

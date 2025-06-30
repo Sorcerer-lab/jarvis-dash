@@ -21,6 +21,7 @@ export async function fetchGitHubXP() {
   try {
     const headers = {
       Accept: 'application/vnd.github+json',
+      Authorization: `Bearer ${process.env.REACT_APP_GITHUB_TOKEN}`,
     };
 
     const reposRes = await axios.get(
