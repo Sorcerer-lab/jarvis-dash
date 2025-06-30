@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Typography,Box } from '@mui/material';
+import { Container, Typography,Box,Card,CardContent,Divider } from '@mui/material';
 import { fetchCFStats } from './api/codeforces';
 import { fetchGitHubStats } from './api/github';
 import { fetchXPData } from './api/xp';
@@ -102,22 +102,44 @@ export default function App() {
     </Box>
   <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around', gap: 4, mt: 6 }}>
   {cfXpData && (
-    <div className="bg-gray-800 p-4 rounded-xl shadow-lg text-center w-[350px]">
-      <p className="text-xl text-blue-400 font-semibold">Codeforces XP</p>
-      <p className="mt-2">Contests: {cfXpData.contestXP} XP</p>
-      <p>Submissions: {cfXpData.submissionXP} XP</p>
-      <p className="mt-2 text-blue-300 font-bold text-lg">Total XP: {cfXpData.total}</p>
-    </div>
+    <Card sx={{ backgroundColor: '#121212', color: 'white', minWidth: 300, maxWidth: 400, boxShadow: 6 }}>
+      <CardContent>
+        <Typography variant="h6" color="cyan" gutterBottom>
+          🧮 Codeforces XP Tracker
+        </Typography>
+        <Divider sx={{ backgroundColor: '#333', mb: 2 }} />
+        <Typography>📈 Rank : {xpData.rankXP??0} XP</Typography>
+        <Typography>📝 Submissions : {xpData.submissionXP??0} XP</Typography>
+        <Typography>⚔️ Contest Submissions : {xpData.contestSubmissionXP??0} XP</Typography>
+        <Typography>🎯 Contest Participation : {xpData.contestParticipationXP??0} XP</Typography>
+        <Divider sx={{ backgroundColor: '#333', my: 2 }} />
+        <Typography variant="body1" color="lightgreen">
+          ⭐ Total XP : {xpData.totalXP??0}
+        </Typography>
+        <Divider sx={{ backgroundColor: '#333', my: 2 }} />
+        {cfXpData.upcomingContest ? (
+    <Box mt={2}>
+      <Typography variant="subtitle1" color="secondary">
+        🕒 Upcoming Contest:
+      </Typography>
+      <Typography>{cfXpData.upcomingContest.name}</Typography>
+      <Typography variant="caption">{cfXpData.upcomingContest.time}</Typography>
+    </Box>
+  ) : (
+    <Typography mt={2}>No upcoming contests.</Typography>
+  )}
+      </CardContent>
+    </Card>
   )}
 
   {ghXpData && (
     <div className="bg-gray-800 p-4 rounded-xl shadow-lg text-center w-[350px]">
       <p className="text-xl text-green-400 font-semibold">GitHub XP</p>
-      <p className="mt-2">📦 Repositories: {ghXpData.repoXP} XP</p>
-      <p>🔨 Commits: {ghXpData.commitXP} XP</p>
-      <p>🚀 PRs: {ghXpData.prXP} XP</p>
-      <p>🐞 Issues: {ghXpData.issueXP} XP</p>
-      <p>⭐ Stars: {ghXpData.starXP} XP</p>
+      <p className="mt-2">📦 Repositories: {ghXpData.repoXP??0} XP</p>
+      <p>🔨 Commits: {ghXpData.commitXP??0} XP</p>
+      <p>🚀 PRs: {ghXpData.prXP??0} XP</p>
+      <p>🐞 Issues: {ghXpData.issueXP??0} XP</p>
+      <p>⭐ Stars: {ghXpData.starXP??0} XP</p>
       <p className="mt-2 text-green-300 font-bold text-lg">Total XP: {ghXpData.total}</p>
     </div>
   )}

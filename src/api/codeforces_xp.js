@@ -1,73 +1,64 @@
+// api/codeforces_xp.js
 import axios from 'axios';
 
-const handle = '_Sorcerer_'; // Change if needed
-const XP_PER_AC = 5;
-const XP_CONTEST_AC = 15;
-const XP_CONTEST_PARTICIPATION = 20;
-const MAX_RATING_XP = 50;
-
-function isThisWeek(timestamp) {
-  const date = new Date(timestamp * 1000);
-  const now = new Date();
-  const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
-  startOfWeek.setHours(0, 0, 0, 0);
-  return date >= startOfWeek;
-}
-
-export async function fetchCodeforcesXP() {
+export const fetchCodeforcesXP= async (handle) => {
   try {
-    const [submissionsRes, ratingRes] = await Promise.all([
+    const [userRes, submissionsRes, contestsRes] = await Promise.all([
+      axios.get(`https://codeforces.com/api/user.info?handles=${handle}`),
       axios.get(`https://codeforces.com/api/user.status?handle=${handle}`),
-      axios.get(`https://codeforces.com/api/user.rating?handle=${handle}`),
+      axios.get(`https://codeforces.com/api/user.rating?handle=${handle}`)
     ]);
 
+    const user = userRes.data.result[0];
     const submissions = submissionsRes.data.result;
-    const ratingChanges = ratingRes.data.result;
+    const contests = contestsRes.data.result;
 
-    const solvedThisWeek = new Set();
-    let contestXP = 0;
+    // --- Rank XP ---
+    const rank = user.rank || 'newbie';
+    const rankXPMap = {
+      newbie: 10, pupil: 20, specialist: 30,
+      expert: 50, candidate_master: 70, master: 100,
+      international_master: 120, grandmaster: 150
+    };
+    const rankXP = rankXPMap[rank] || 5;
 
-    for (const sub of submissions) {
-      if (sub.verdict === 'OK' && isThisWeek(sub.creationTimeSeconds)) {
-        const problemKey = `${sub.problem.contestId}-${sub.problem.index}`;
-        if (!solvedThisWeek.has(problemKey)) {
-          solvedThisWeek.add(problemKey);
+    // --- Submissions XP ---
+    const totalSubmissions = submissions.length;
+    const submissionXP = totalSubmissions * 1;
 
-          if (sub.author.participantType === 'CONTESTANT') {
-            contestXP += XP_CONTEST_AC;
-          } else {
-            contestXP += XP_PER_AC;
-          }
-        }
-      }
-    }
+    // --- Contest Submissions XP ---
+    const contestSubXP = submissions.filter(sub => sub.author.participantType === 'CONTESTANT').length * 2;
 
-    const latestContest = ratingChanges.at(-1);
-    let contestParticipationXP = 0;
-    let ratingXP = 0;
+    // --- Contest Participation XP ---
+    const contestParticipationXP = contests.length * 10;
 
-    if (latestContest && isThisWeek(latestContest.ratingUpdateTimeSeconds)) {
-      contestParticipationXP += XP_CONTEST_PARTICIPATION;
-      const delta = latestContest.newRating - latestContest.oldRating;
-      if (delta > 0) {
-        ratingXP += Math.min(Math.floor(delta / 10), MAX_RATING_XP);
-      }
-    }
+    const totalXP = rankXP + submissionXP + contestSubXP + contestParticipationXP;
+
+    // --- Upcoming Contests ---
+    const allContests = await axios.get('https://codeforces.com/api/contest.list');
+    const upcoming = allContests.data.result.filter(c => c.phase === 'BEFORE');
+    const nextContest = upcoming.length > 0 ? upcoming[0] : null;
+    console.log("🔍 User Data:", user);
+console.log("📄 Submissions:", submissions.slice(0, 5)); // just first 5
+console.log("📊 Contests:", contests);
+console.log("⏳ Upcoming Contests:", upcoming.slice(0, 3));
+
 
     return {
-      acXP: solvedThisWeek.size * XP_PER_AC,
-      contestXP,
+      rankXP,
+      submissionXP,
+      contestSubXP,
       contestParticipationXP,
-      ratingXP,
-      total:
-        solvedThisWeek.size * XP_PER_AC +
-        contestXP +
-        contestParticipationXP +
-        ratingXP,
+      totalXP,
+      upcomingContest: nextContest
+        ? {
+            name: nextContest.name,
+            time: new Date(nextContest.startTimeSeconds * 1000).toLocaleString()
+          }
+        : null
     };
   } catch (err) {
     console.error('❌ Error fetching Codeforces XP:', err);
-    return { total: 0 };
+    return null;
   }
-}
+};
