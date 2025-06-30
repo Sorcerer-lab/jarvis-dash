@@ -8,13 +8,14 @@ const XP_PER_PR = 10;
 const XP_PER_ISSUE = 5;
 const XP_PER_STAR = 1;
 
-function isThisWeek(dateStr) {
+function isToday(dateStr) {
   const date = new Date(dateStr);
   const now = new Date();
-  const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - now.getDay());
-  startOfWeek.setHours(0, 0, 0, 0);
-  return date >= startOfWeek;
+  return (
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate()
+  );
 }
 
 export async function fetchGitHubXP() {
@@ -34,40 +35,57 @@ export async function fetchGitHubXP() {
     let totalPRs = 0;
     let totalIssues = 0;
     let totalStars = 0;
+    
+    const today = new Date();
+const todayRepos = repos.filter(repo => {
+  if (repo.fork || repo.archived) return false;
+  const created = new Date(repo.created_at);
+  return (
+    created.getFullYear() === today.getFullYear() &&
+    created.getMonth() === today.getMonth() &&
+    created.getDate() === today.getDate()
+  );
+});
 
     for (const repo of repos) {
+      // Only check active, non-forked repos
+      if (repo.fork || repo.archived) continue;
+
+      // Commits
       const commitsRes = await axios.get(
         `https://api.github.com/repos/${username}/${repo.name}/commits?author=${username}`,
         { headers }
       );
-
-      const recentCommits = commitsRes.data.filter(commit =>
-        isThisWeek(commit.commit.author.date)
+      const todayCommits = commitsRes.data.filter(commit =>
+        isToday(commit.commit.author.date)
       );
-      totalCommits += recentCommits.length;
+      totalCommits += todayCommits.length;
 
+      // Issues
       const issuesRes = await axios.get(
         `https://api.github.com/repos/${username}/${repo.name}/issues?creator=${username}&state=all`,
         { headers }
       );
-      const recentIssues = issuesRes.data.filter(
-        issue => isThisWeek(issue.created_at) && !issue.pull_request
+      const todayIssues = issuesRes.data.filter(
+        issue => isToday(issue.created_at) && !issue.pull_request
       );
-      totalIssues += recentIssues.length;
+      totalIssues += todayIssues.length;
 
+      // PRs
       const prsRes = await axios.get(
         `https://api.github.com/repos/${username}/${repo.name}/pulls?state=all`,
         { headers }
       );
-      const recentPRs = prsRes.data.filter(
-        pr => pr.user.login === username && isThisWeek(pr.created_at)
+      const todayPRs = prsRes.data.filter(
+        pr => pr.user.login === username && isToday(pr.created_at)
       );
-      totalPRs += recentPRs.length;
+      totalPRs += todayPRs.length;
 
+      // Stars (stars are total, not per-day — GitHub doesn’t expose star timestamps via public API)
       totalStars += repo.stargazers_count;
     }
 
-    const repoXP = repos.length * XP_PER_REPO;
+   const repoXP = todayRepos.length * XP_PER_REPO;
     const commitXP = totalCommits * XP_PER_COMMIT;
     const prXP = totalPRs * XP_PER_PR;
     const issueXP = totalIssues * XP_PER_ISSUE;
@@ -83,6 +101,13 @@ export async function fetchGitHubXP() {
     };
   } catch (err) {
     console.error('❌ Error fetching GitHub XP:', err);
-    return { total: 0 };
+    return {
+      repoXP: 0,
+      commitXP: 0,
+      prXP: 0,
+      issueXP: 0,
+      starXP: 0,
+      total: 0,
+    };
   }
 }
